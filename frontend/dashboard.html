@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard</title>
+
+    <meta name="api-base-url" content="">
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
+    <script src="js/config.js"></script>
+
+</head>
+
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            ⚖️ VerifyMeasure
+        </div>
+
+        <div class="nav-links">
+
+            <a href="dashboard.html">
+                Dashboard
+            </a>
+
+            <a href="register.html">
+                Register
+            </a>
+
+            <a href="verification.html">
+                Verification
+            </a>
+
+            <a href="search.html">
+                Search
+            </a>
+
+            <a href="index.html">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <main class="dashboard">
+
+        <h1>
+            Dashboard
+        </h1>
+
+        <p id="welcomeUser">
+            Welcome
+        </p>
+
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <h3>
+                    Total Instruments
+                </h3>
+
+                <p id="totalInstruments">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Verified
+                </h3>
+
+                <p id="verified">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Pending
+                </h3>
+
+                <p id="pending">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Expired
+                </h3>
+
+                <p id="expired">
+                    0
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-actions">
+
+            <a href="register.html"
+               class="dashboard-btn">
+
+                Register Instrument
+
+            </a>
+
+
+            <a href="verification.html"
+               class="dashboard-btn">
+
+                Verify Instrument
+
+            </a>
+
+
+            <a href="search.html"
+               class="dashboard-btn">
+
+                Search Instrument
+
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        const email =
+            localStorage.getItem("userEmail");
+
+        const role =
+            localStorage.getItem("userRole");
+
+
+        if (email) {
+
+            document.getElementById(
+                "welcomeUser"
+            ).innerText =
+                "Welcome, " +
+                role +
+                " (" +
+                email +
+                ")";
+
+        }
+
+         async function loadDashboardStats() {
+
+        try {
+
+            const response = await fetch(
+                window.APP_CONFIG.API_BASE_URL + "/instruments/dashboard/stats"
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to load dashboard statistics"
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            document.getElementById(
+                "totalInstruments"
+            ).innerText =
+                data.total_instruments;
+
+
+            document.getElementById(
+                "verified"
+            ).innerText =
+                data.verified;
+
+
+            document.getElementById(
+                "pending"
+            ).innerText =
+                data.pending;
+
+
+            document.getElementById(
+                "expired"
+            ).innerText =
+                data.expired;
+
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    loadDashboardStats();
+
+
+    </script>
+
+</body>
+
+</html>

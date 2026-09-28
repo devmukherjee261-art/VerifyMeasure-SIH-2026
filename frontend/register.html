@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Register Instrument</title>
+
+    <meta name="api-base-url" content="">
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
+</head>
+
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        ⚖️ VerifyMeasure
+    </div>
+
+    <div class="nav-links">
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="form-page">
+
+<div class="form-card wide">
+
+<h2>
+    Register Instrument
+</h2>
+
+
+<form id="instrumentForm">
+
+
+<label>
+    Instrument ID
+</label>
+
+<input
+    type="text"
+    id="instrumentId"
+    placeholder="Example: INS-1001"
+    required
+>
+
+
+<label>
+    Instrument Type
+</label>
+
+<select id="instrumentType">
+
+    <option>
+        Weighing Scale
+    </option>
+
+    <option>
+        Electronic Balance
+    </option>
+
+    <option>
+        Measuring Meter
+    </option>
+
+    <option>
+        Weighbridge
+    </option>
+
+</select>
+
+
+<label>
+    Manufacturer
+</label>
+
+<input
+    type="text"
+    id="manufacturer"
+    placeholder="Manufacturer name"
+    required
+>
+
+
+<label>
+    Model Number
+</label>
+
+<input
+    type="text"
+    id="model"
+    placeholder="Model number"
+    required
+>
+
+
+<label>
+    Serial Number
+</label>
+
+<input
+    type="text"
+    id="serial"
+    placeholder="Serial number"
+    required
+>
+
+
+<label>
+    Capacity
+</label>
+
+<input
+    type="text"
+    id="capacity"
+    placeholder="Example: 50 kg"
+    required
+>
+
+
+<label>
+    Location
+</label>
+
+<input
+    type="text"
+    id="location"
+    placeholder="Instrument location"
+    required
+>
+
+
+<label>
+    Owner Name
+</label>
+
+<input
+    type="text"
+    id="owner"
+    placeholder="Owner name"
+    required
+>
+
+
+<button
+    type="submit"
+    class="form-btn">
+
+    Register Instrument
+
+</button>
+
+
+</form>
+
+</div>
+
+</div>
+
+
+<script src="js/config.js"></script>
+<script src="js/script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,74 @@
+# --- Secrets and local environment -------------------------------------------
+# Every .env file is ignored by default. The two templates below are the only
+# .env files allowed into the repository, and they contain placeholders only.
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Belt-and-braces: catch secrets even if a variant name slips past the rules
+# above, such as .env.local, .env.prod, env.txt or a stray PEM.
+.env.local
+.env.production
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+secrets*.json
+credentials*.json
+*service-account*.json
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+env/
+ENV/
+.python-version.local
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+*.egg-info/
+pip-wheel-metadata/
+
+# --- Databases ---------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+dump.sql
+*.dump
+
+# --- Node / frontend ---------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.vite/
+.next/
+dist/
+build/
+
+# --- Generated and uploaded artifacts ---------------------------------------
+backend/generated_pdfs/
+generated_pdfs/
+uploads/
+*.log
+# One-off test artifacts at the repository root
+/test_*.pdf
+/test_*.png
+/test_*.jpg
+
+# --- Editors and OS ----------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,12 @@
+# Production web process for Render (and other PaaS hosts).
+#
+# Run from the repository's backend/ directory. Render's "Root Directory"
+# setting for the web service must be `backend`.
+#
+# Worker count defaults to 1 on purpose. app/main.py runs
+# Base.metadata.create_all() and upgrade_workflow_schema() at import time, so
+# two workers starting simultaneously can race each other issuing the same DDL
+# against a fresh database. A free-tier instance is 0.5 GB / 0.1 CPU anyway and
+# gains nothing from a second worker. Raise WEB_CONCURRENCY only after moving
+# schema setup behind a migration step or a startup lock.
+web: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers ${WEB_CONCURRENCY:-1} --proxy-headers --forwarded-allow-ips '*' --no-reload

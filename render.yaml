@@ -1,0 +1,68 @@
+# Render Blueprint for VerifyMeasure.
+#
+# This file declares the application services only. It deliberately does NOT
+# declare a database. The database is a Neon PostgreSQL project created
+# separately at https://console.neon.tech, because Render's own free
+# PostgreSQL expires after 30 days. See DEPLOY.md section A2.
+#
+# The PostgreSQL instance is intentionally absent. Create it separately and set
+# the DATABASE_URL environment variable on the web service by hand in the
+# Render dashboard. Blueprint-declared databases would be created and destroyed
+# together with the blueprint, which is not what you want for data you care
+# about.
+
+services:
+  - type: web
+    name: verifymeasure-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: >-
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port $PORT
+      --workers 1
+      --proxy-headers
+      --forwarded-allow-ips '*'
+      --no-reload
+    healthCheckPath: /health
+    # Free instances spin down after 15 minutes without traffic. Expect the
+    # first request after an idle period to take roughly 30-60 seconds while
+    # the service cold starts.
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.12.11
+      - key: DEBUG
+        value: "false"
+      - key: RELOAD
+        value: "false"
+      # --- Values that must be set by hand in the dashboard. `sync: false`
+      # --- keeps them out of this file so no secret ever enters git.
+      - key: DATABASE_URL
+        sync: false
+        # Neon's direct (non-pooled) connection string, from A2.
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: PUBLIC_VERIFICATION_URL
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+      - key: ADMIN_BOOTSTRAP_TOKEN
+        generateValue: true
+
+  - type: web
+    name: verifymeasure-web
+    runtime: static
+    buildCommand: null
+    staticPublishPath: ./frontend
+    # No catch-all rewrite is declared on purpose. This app uses real
+    # multi-page navigation (verify.html, search.html, certificate.html), and a
+    # /* -> /index.html rewrite would swallow every one of those routes.

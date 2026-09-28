@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Search Instrument</title>
+
+    <meta name="api-base-url" content="">
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
+    <script src="js/config.js"></script>
+
+</head>
+
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        ⚖️ VerifyMeasure
+    </div>
+
+    <div class="nav-links">
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+        <a href="register.html">
+            Register
+        </a>
+
+        <a href="verification.html">
+            Verification
+        </a>
+
+        <a href="search.html">
+            Search
+        </a>
+
+        <a href="index.html">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="form-page">
+
+<div class="form-card wide">
+
+<h2>
+    Search Instrument
+</h2>
+
+
+<p class="form-subtitle">
+
+    Enter the Instrument ID to search
+</p>
+
+
+<form id="searchForm">
+
+    <label>
+        Instrument ID
+    </label>
+
+    <input
+        type="text"
+        id="searchId"
+        placeholder="Example: INS-1001"
+        required
+    >
+
+
+    <button
+        type="submit"
+        class="form-btn">
+
+        Search
+    </button>
+
+</form>
+
+
+<div
+    id="searchResult"
+    class="search-result">
+</div>
+
+
+</div>
+
+</div>
+
+
+<script>
+const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
+
+const searchForm =
+    document.getElementById(
+        "searchForm"
+    );
+
+
+searchForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        const searchId =
+            document.getElementById(
+                "searchId"
+            ).value;
+
+        const result =
+            document.getElementById(
+                "searchResult"
+            );
+
+        result.innerHTML = "<p>Searching...</p>";
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/instruments/search?instrument_id=${encodeURIComponent(searchId)}`
+            );
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("Instrument not found");
+                }
+                throw new Error("Unable to search instruments");
+            }
+
+            const instrument = await response.json();
+
+            let resultHTML = `
+                <h3>Instrument Found</h3>
+
+                <p>
+                    <strong>Instrument ID:</strong>
+                    ${instrument.instrument_id}
+                </p>
+
+                <p>
+                    <strong>Type:</strong>
+                    ${instrument.instrument_type}
+                </p>
+
+                <p>
+                    <strong>Manufacturer:</strong>
+                    ${instrument.manufacturer}
+                </p>
+
+                <p>
+                    <strong>Model:</strong>
+                    ${instrument.model_number}
+                </p>
+
+                <p>
+                    <strong>Serial Number:</strong>
+                    ${instrument.serial_number}
+                </p>
+
+                <p>
+                    <strong>Capacity:</strong>
+                    ${instrument.capacity}
+                </p>
+
+                <p>
+                    <strong>Location:</strong>
+                    ${instrument.location}
+                </p>
+
+                <p>
+                    <strong>Owner:</strong>
+                    ${instrument.owner_name}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    <span style="color: ${instrument.status === 'Verified' ? 'green' : instrument.status === 'Pending' ? 'orange' : 'red'};">
+                        ${instrument.status}
+                    </span>
+                </p>
+            `;
+
+            if (instrument.verification_date) {
+                resultHTML += `
+                    <p>
+                        <strong>Verification Date:</strong>
+                        ${instrument.verification_date}
+                    </p>
+                `;
+            }
+
+            if (instrument.next_due_date) {
+                resultHTML += `
+                    <p>
+                        <strong>Next Due Date:</strong>
+                        ${instrument.next_due_date}
+                    </p>
+                `;
+            }
+
+            if (instrument.remarks) {
+                resultHTML += `
+                    <p>
+                        <strong>Remarks:</strong>
+                        ${instrument.remarks}
+                    </p>
+                `;
+            }
+
+            result.innerHTML = resultHTML;
+
+            if (instrument.status === 'Verified') {
+                await loadCertificateInfo(instrument.id, result);
+            }
+
+        } catch (error) {
+
+            result.innerHTML = `
+
+                <h3>
+                    Instrument Not Found
+                </h3>
+
+                <p>
+                    ${error.message === "Instrument not found"
+                        ? "No instrument was found with this ID."
+                        : "Could not connect to the backend."}
+                </p>
+
+            `;
+
+        }
+
+    }
+);
+
+
+async function loadCertificateInfo(instrumentDbId, resultElement) {
+    try {
+        const certResponse = await fetch(
+            `${API_BASE_URL}/certificates/instrument/${instrumentDbId}`
+        );
+
+        if (certResponse.ok) {
+            const certificates = await certResponse.json();
+
+            if (certificates && certificates.length > 0) {
+                const latestCert = certificates[0];
+                const certSection = document.createElement('div');
+                certSection.style.marginTop = '20px';
+                certSection.style.paddingTop = '20px';
+                certSection.style.borderTop = '1px solid #ddd';
+
+                const API_BASE = API_BASE_URL;
+                let certHTML = `
+                    <h3>Certificate Information</h3>
+                    <p><strong>Certificate Number:</strong> ${latestCert.certificate_number}</p>
+                    <p><strong>Issue Date:</strong> ${latestCert.verification_date}</p>
+                    <p><strong>Valid From:</strong> ${latestCert.valid_from}</p>
+                    <p><strong>Valid Until:</strong> ${latestCert.valid_until}</p>
+                    <p><strong>Status:</strong> <span style="color: ${latestCert.status === 'Active' ? 'green' : 'red'};">${latestCert.status}</span></p>
+                    <p><strong>Result:</strong> ${latestCert.result}</p>
+                    <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="${API_BASE}/certificates/token/${latestCert.qr_token}/pdf" target="_blank" class="form-btn" style="width: auto; padding: 10px 20px; text-decoration: none; display: inline-block;">Download Certificate PDF</a>
+                        <a href="${API_BASE}/certificates/token/${latestCert.qr_token}/qr" target="_blank" class="form-btn" style="width: auto; padding: 10px 20px; text-decoration: none; display: inline-block; background-color: #28a745;">View QR Code</a>
+                        <a href="${API_BASE}/certificates/verify/${latestCert.qr_token}" target="_blank" class="form-btn" style="width: auto; padding: 10px 20px; text-decoration: none; display: inline-block; background-color: #17a2b8;">Public Verification</a>
+                    </div>
+                `;
+
+                certSection.innerHTML = certHTML;
+                resultElement.appendChild(certSection);
+            } else {
+                const noCert = document.createElement('p');
+                noCert.style.marginTop = '20px';
+                noCert.style.color = '#666';
+                noCert.innerHTML = '<em>No certificate found for this instrument.</em>';
+                resultElement.appendChild(noCert);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading certificate info:', error);
+    }
+}
+
+</script>
+
+</body>
+
+</html>

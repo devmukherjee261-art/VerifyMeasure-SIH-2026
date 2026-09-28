@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Login</title>
+
+    <meta name="api-base-url" content="">
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
+</head>
+
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            ⚖️ VerifyMeasure
+        </div>
+
+        <div class="nav-links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="form-page">
+
+        <div class="form-card">
+
+            <h2>Login</h2>
+
+            <p class="form-subtitle">
+                Login to the verification system
+            </p>
+
+
+            <form id="loginForm">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Enter email"
+                    required
+                >
+
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter password"
+                    required
+                >
+
+
+                <button type="submit" class="form-btn">
+
+                    Login
+
+                </button>
+
+            </form>
+
+            <p id="loginError" role="alert" style="color: #b91c1c;"></p>
+
+        </div>
+
+    </div>
+
+
+    <script src="js/config.js"></script>
+    <script src="js/script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="api-base-url" content=""><title>Verification Workflow</title><link rel="stylesheet" href="css/style.css"><script src="js/config.js"></script></head>
+<body>
+<nav class="navbar"><div class="logo">VerifyMeasure</div><div class="nav-links"><a href="dashboard.html">Dashboard</a></div></nav>
+<main class="form-page"><div class="form-card wide">
+<h2>Instrument Verification Workflow</h2><p id="workflowMessage" class="form-subtitle"></p>
+
+<section id="applicantPanel" hidden><h3>Create application</h3><form id="applicationForm">
+<label>Instrument ID</label><input id="instrumentIdentifier" required>
+<label>Application type</label><select id="applicationType"><option value="Verification">Verification</option><option value="Re-verification">Re-verification</option></select>
+<label>Applicant remarks</label><textarea id="applicationRemarks"></textarea><button class="form-btn">Submit application</button></form><div id="applicationList"></div></section>
+
+<section id="inspectorPanel" hidden><h3>Assigned applications</h3><button id="loadAssigned" class="form-btn">Load assigned applications</button><div id="assignedList"></div>
+<form id="inspectionForm"><h3>Submit inspection</h3><label>Application ID</label><input id="inspectionApplicationId" type="number" required>
+<label>Standard value</label><input id="standardValue" type="number" step="any" required><label>Measured value</label><input id="measuredValue" type="number" step="any" required><label>Unit</label><input id="measurementUnit" required><label>Test information / method</label><textarea id="testInformation" required></textarea><label>Observations</label><textarea id="observations"></textarea><label>Evidence/reference</label><input id="evidenceReference"><label>Inspector result</label><select id="testResult"><option value="Pass">Pass</option><option value="Fail">Fail</option></select><label>Remarks</label><textarea id="inspectorRemarks"></textarea><button class="form-btn">Submit inspection</button></form></section>
+
+<section id="officerPanel" hidden><h3>Schedule, decide, or certify</h3>
+<form id="scheduleForm"><label>Application ID</label><input id="scheduleApplicationId" type="number" required><label>Inspector user ID</label><input id="assignedInspectorId" type="number" required><label>Schedule (optional)</label><input id="scheduledFor" type="datetime-local"><label>Notes</label><textarea id="schedulingNotes"></textarea><button class="form-btn">Schedule</button></form>
+<form id="decisionForm"><label>Application ID</label><input id="decisionApplicationId" type="number" required><label>Decision</label><select id="decision"><option value="approved">Approve</option><option value="rejected">Reject</option></select><label>Reason</label><textarea id="decisionReason"></textarea><button class="form-btn">Record decision</button></form>
+<form id="certificateForm"><label>Approved application ID</label><input id="certificateApplicationId" type="number" required><button class="form-btn">Issue certificate</button></form></section>
+</div></main>
+<script>
+const API=window.APP_CONFIG.API_BASE_URL, token=localStorage.getItem('accessToken'), role=localStorage.getItem('userRole');
+const message=document.getElementById('workflowMessage'); const headers=()=>({'Content-Type':'application/json',Authorization:`Bearer ${token}`});
+const show=(id)=>document.getElementById(id).hidden=false;
+if(!token){message.textContent='Please log in to use the workflow.';} else if(role==='applicant') show('applicantPanel'); else if(role==='inspector') show('inspectorPanel'); else if(['approving_officer','administrator'].includes(role)) {show('officerPanel'); if(role==='administrator') show('inspectorPanel');} else message.textContent='Your role has no workflow access.';
+async function request(path,method='GET',body){const r=await fetch(API+path,{method,headers:body?headers():{Authorization:`Bearer ${token}`},body:body?JSON.stringify(body):undefined});const data=await r.json();if(!r.ok)throw Error(data.detail||'Request failed');return data;}
+function result(text){message.textContent=text;}
+document.getElementById('applicationForm')?.addEventListener('submit',async e=>{e.preventDefault();try{const i=await request(`/instruments/search?instrument_id=${encodeURIComponent(instrumentIdentifier.value)}`);const a=await request('/applications/','POST',{instrument_id:i.id,application_type:applicationType.value,remarks:applicationRemarks.value});result(`Application ${a.application_number} submitted.`);}catch(e){result(e.message);}});
+document.getElementById('loadAssigned')?.addEventListener('click',async()=>{try{const a=await request('/applications/assigned/pending');assignedList.textContent=a.map(x=>`${x.id}: ${x.application_number} — ${x.instrument.instrument_id}`).join('\n')||'No assigned applications.';}catch(e){result(e.message);}});
+document.getElementById('inspectionForm')?.addEventListener('submit',async e=>{e.preventDefault();try{const i=await request('/inspections/','POST',{application_id:+inspectionApplicationId.value,standard_value:+standardValue.value,measured_value:+measuredValue.value,measurement_unit:measurementUnit.value,test_information:testInformation.value,observations:observations.value||null,evidence_reference:evidenceReference.value||null,result:testResult.value,inspector_remarks:inspectorRemarks.value||null});result(`Inspection ${i.id} submitted for officer review.`);}catch(e){result(e.message);}});
+document.getElementById('scheduleForm')?.addEventListener('submit',async e=>{e.preventDefault();try{await request(`/applications/${scheduleApplicationId.value}/schedule`,'POST',{inspector_id:+assignedInspectorId.value,scheduled_for:scheduledFor.value||null,scheduling_notes:schedulingNotes.value||null});result('Application scheduled.');}catch(e){result(e.message);}});
+document.getElementById('decisionForm')?.addEventListener('submit',async e=>{e.preventDefault();try{await request(`/applications/${decisionApplicationId.value}/decision`,'POST',{decision:decision.value,reason:decisionReason.value||null});result(`Application ${decision.value}.`);}catch(e){result(e.message);}});
+document.getElementById('certificateForm')?.addEventListener('submit',async e=>{e.preventDefault();try{const c=await request('/certificates/issue','POST',{application_id:+certificateApplicationId.value});location.href=`certificate.html?certificate=${encodeURIComponent(c.certificate_number)}&token=${encodeURIComponent(c.qr_token)}`;}catch(e){result(e.message);}});
+</script></body></html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Public Certificate Verification | Legal Metrology</title>
+
+    <!-- api-base-url is the deployment-time injection point; see js/config.js -->
+    <meta name="api-base-url" content="">
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
+    <script src="js/config.js"></script>
+
+    <style>
+        .verify-container {
+            max-width: 680px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .verify-header {
+            background: linear-gradient(135deg, #1e3a8a, #0f766e);
+            color: #ffffff;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .verify-header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .verify-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .verify-body {
+            padding: 28px;
+        }
+
+        .badge-verified {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1.5px solid #10b981;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .badge-expired {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1.5px solid #ef4444;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .badge-invalid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff1f2;
+            color: #be123c;
+            border: 1.5px solid #f43f5e;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            text-align: center;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .info-item {
+            background: #f8fafc;
+            padding: 12px 14px;
+            border-radius: 6px;
+            border-left: 3px solid #1e3a8a;
+        }
+
+        .info-item.full-width {
+            grid-column: span 2;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            color: #0f172a;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: #0f766e;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background: #0d9488;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .search-box button {
+            padding: 10px 18px;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .statutory-notice {
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.4;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 14px;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        ⚖️ VerifyMeasure
+    </div>
+
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="search.html">Search</a>
+        <a href="dashboard.html">Dashboard</a>
+    </div>
+
+</nav>
+
+
+<div class="verify-container">
+
+    <div class="verify-header">
+        <h1>Official Certificate Verification</h1>
+        <p>Government of India | Legal Metrology Verification System</p>
+    </div>
+
+    <div class="verify-body">
+
+        <!-- Manual QR Token / Certificate Lookup Form -->
+        <form id="verifyForm" class="search-box">
+            <input
+                type="text"
+                id="tokenInput"
+                placeholder="Enter QR Security Token or Certificate Number..."
+                required
+            >
+            <button type="submit">Verify</button>
+        </form>
+
+        <div id="verifyLoading" style="display: none; text-align: center; padding: 30px; color: #475569;">
+            <p>Verifying certificate authenticity against Legal Metrology PostgreSQL database...</p>
+        </div>
+
+        <div id="verifyResult" style="display: none;"></div>
+
+        <div class="statutory-notice">
+            Official public verification service under The Legal Metrology Act, 2009.
+            Commercial transaction with unverified or tampered weights and measures is punishable under law.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+const BACKEND_BASE = window.APP_CONFIG.API_BASE_URL;
+
+async function performVerification(tokenOrNumber) {
+    const loading = document.getElementById("verifyLoading");
+    const result = document.getElementById("verifyResult");
+
+    loading.style.display = "block";
+    result.style.display = "none";
+    result.innerHTML = "";
+
+    try {
+        let resp = null;
+        let data = null;
+
+        // Try QR Token first
+        resp = await fetch(`${BACKEND_BASE}/certificates/verify/${encodeURIComponent(tokenOrNumber)}`);
+        
+        // If not found by token, check by certificate number
+        if (!resp.ok && tokenOrNumber.toUpperCase().startsWith("CERT-")) {
+            resp = await fetch(`${BACKEND_BASE}/certificates/number/${encodeURIComponent(tokenOrNumber)}`);
+            if (resp.ok) {
+                const certRaw = await resp.json();
+                // Then query the safe public verify endpoint with its token
+                resp = await fetch(`${BACKEND_BASE}/certificates/verify/${encodeURIComponent(certRaw.qr_token)}`);
+            }
+        }
+
+        if (resp && resp.ok) {
+            data = await resp.json();
+            renderAuthenticCertificate(data);
+        } else {
+            renderInvalidCertificate(tokenOrNumber);
+        }
+
+    } catch (err) {
+        console.error("Verification error:", err);
+        result.innerHTML = `
+            <div class="badge-invalid">
+                ⚠️ Backend Service Offline<br/>
+                <span style="font-size: 0.85rem; font-weight: normal; margin-top: 4px; display: inline-block;">
+                    Could not connect to the Legal Metrology verification server. Please verify server status.
+                </span>
+            </div>
+        `;
+        result.style.display = "block";
+    } finally {
+        loading.style.display = "none";
+    }
+}
+
+function renderAuthenticCertificate(data) {
+    const result = document.getElementById("verifyResult");
+
+    let statusBadge = "";
+    if (data.is_valid_currently) {
+        statusBadge = `
+            <div class="badge-verified">
+                ✓ AUTHENTIC & VALID VERIFICATION CERTIFICATE
+            </div>
+            <p style="text-align: center; color: #047857; font-weight: 600; margin-bottom: 20px; font-size: 0.95rem;">
+                Statutorily Compliant (${data.days_remaining} days remaining until statutory re-verification)
+            </p>
+        `;
+    } else {
+        statusBadge = `
+            <div class="badge-expired">
+                ⚠️ CERTIFICATE EXPIRED - RE-VERIFICATION MANDATORY
+            </div>
+            <p style="text-align: center; color: #b91c1c; font-weight: 600; margin-bottom: 20px; font-size: 0.95rem;">
+                Validity expired on ${data.valid_until}. Use in commercial transactions is prohibited.
+            </p>
+        `;
+    }
+
+    result.innerHTML = `
+        ${statusBadge}
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Certificate Number</div>
+                <div class="info-value" style="color: #1e3a8a; font-weight: bold;">${data.certificate_number}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Security QR Token</div>
+                <div class="info-value" style="font-family: monospace; font-size: 0.85rem;">${data.qr_token.substring(0, 16)}...</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Instrument ID</div>
+                <div class="info-value">${data.instrument_identifier}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Instrument Category / Type</div>
+                <div class="info-value">${data.instrument_type}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Manufacturer & Model</div>
+                <div class="info-value">${data.manufacturer} / ${data.model_number}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Serial Number</div>
+                <div class="info-value">${data.serial_number}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Rated Capacity / Location</div>
+                <div class="info-value">${data.capacity} | ${data.location}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Registered Owner (Masked)</div>
+                <div class="info-value">${data.owner_masked}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Verification Date (Valid From)</div>
+                <div class="info-value">${data.verification_date}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Statutory Due Date (Valid Until)</div>
+                <div class="info-value" style="font-weight: bold; color: ${data.is_valid_currently ? '#047857' : '#b91c1c'};">${data.valid_until} (${data.validity_months} months)</div>
+            </div>
+
+            <div class="info-item full-width">
+                <div class="info-label">Issuing Authority / Centre</div>
+                <div class="info-value">${data.issuing_authority}</div>
+            </div>
+        </div>
+
+        <a href="${BACKEND_BASE}${data.pdf_download_url}" target="_blank" class="btn-action">
+            Download Official Statutory PDF Certificate
+        </a>
+
+        <p style="text-align: center; margin-top: 10px; font-size: 0.75rem; color: #64748b;">
+            Verified at: ${new Date(data.verification_timestamp).toLocaleString()}
+        </p>
+    `;
+
+    result.style.display = "block";
+}
+
+function renderInvalidCertificate(tokenOrNumber) {
+    const result = document.getElementById("verifyResult");
+
+    result.innerHTML = `
+        <div class="badge-invalid">
+            ❌ UNVERIFIED / POTENTIALLY COUNTERFEIT INSTRUMENT
+        </div>
+
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 18px; color: #9f1239; line-height: 1.5; font-size: 0.9rem;">
+            <p style="margin-bottom: 8px; font-weight: bold;">
+                No authentic verification record was found matching:
+            </p>
+            <p style="font-family: monospace; background: white; padding: 6px 10px; border-radius: 4px; display: inline-block; margin-bottom: 12px; border: 1px solid #fda4af;">
+                ${tokenOrNumber}
+            </p>
+            <p>
+                <b>Statutory Warning:</b> The scanned instrument or certificate does not possess a recognized digital seal from the Legal Metrology Department.
+                Use of unverified measuring devices in trade, commerce, or medical diagnosis violates The Legal Metrology Act, 2009.
+            </p>
+            <p style="margin-top: 10px; font-size: 0.85rem;">
+                If you suspect tampering or fraud, please register a complaint with your District Legal Metrology Officer.
+            </p>
+        </div>
+    `;
+
+    result.style.display = "block";
+}
+
+// Check URL query params on page load
+window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const certNum = params.get("certificate");
+
+    if (token) {
+        document.getElementById("tokenInput").value = token;
+        performVerification(token);
+    } else if (certNum) {
+        document.getElementById("tokenInput").value = certNum;
+        performVerification(certNum);
+    }
+
+    document.getElementById("verifyForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const inputVal = document.getElementById("tokenInput").value.trim();
+        if (inputVal) {
+            performVerification(inputVal);
+        }
+    });
+});
+</script>
+
+</body>
+
+</html>
