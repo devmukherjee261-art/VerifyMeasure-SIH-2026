@@ -406,6 +406,66 @@ footer {
 }
 
 
+/* Password visibility toggle. script.js wraps each password input in
+   .password-field and injects the button, so this works for every auth form
+   without duplicating markup. */
+
+.password-field {
+
+    position: relative;
+}
+
+.form-card .password-field input {
+
+    padding-right: 48px;
+}
+
+.password-toggle {
+
+    position: absolute;
+
+    right: 7px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 34px;
+
+    height: 34px;
+
+    padding: 0;
+
+    background-color: transparent;
+
+    border: 1px solid transparent;
+
+    border-radius: 5px;
+
+    color: #0b3d91;
+
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+
+    background-color: #eef2fa;
+}
+
+.password-toggle:focus-visible {
+
+    outline: 2px solid #0b3d91;
+
+    outline-offset: 1px;
+}
+
+
 /* Dashboard */
 
 .dashboard {

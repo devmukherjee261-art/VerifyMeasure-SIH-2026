@@ -552,3 +552,105 @@ if (verificationForm) {
 
 }
 
+
+// Password visibility toggle
+//
+// Wraps every password input on the page and injects an eye button that
+// switches that input between type="password" and type="text". The value is
+// never read, copied, stored or logged: only the type attribute changes.
+//
+// A real <button type="button"> is used deliberately. It is reachable with
+// Tab, activated by Enter or Space, cannot submit the surrounding form, and
+// carries aria-label plus aria-pressed so the state is announced. The SVG is
+// aria-hidden because the button's own label already describes it.
+
+const PASSWORD_EYE_OPEN =
+    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"' +
+    ' stroke="currentColor" stroke-width="2" stroke-linecap="round"' +
+    ' stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+    '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>' +
+    '<circle cx="12" cy="12" r="3"></circle></svg>';
+
+const PASSWORD_EYE_CLOSED =
+    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"' +
+    ' stroke="currentColor" stroke-width="2" stroke-linecap="round"' +
+    ' stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+    '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>' +
+    '<circle cx="12" cy="12" r="3"></circle>' +
+    '<line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+
+
+// Runs the callback once the document is parsed, whether this file was loaded
+// from <head> or from the end of <body>.
+function whenDomReady(callback) {
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", callback);
+    } else {
+        callback();
+    }
+
+}
+
+
+function attachPasswordToggles(root) {
+
+    const inputs =
+        (root || document).querySelectorAll('input[type="password"]');
+
+    Array.prototype.forEach.call(inputs, function(input) {
+
+        if (input.getAttribute("data-password-toggle") === "on") {
+            return;
+        }
+        input.setAttribute("data-password-toggle", "on");
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "password-field";
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "password-toggle";
+        button.innerHTML = PASSWORD_EYE_OPEN;
+
+        if (input.id) {
+            button.setAttribute("aria-controls", input.id);
+        }
+
+        function apply(visible) {
+
+            input.type = visible ? "text" : "password";
+
+            const label =
+                visible ? "Hide password" : "Show password";
+
+            button.innerHTML =
+                visible ? PASSWORD_EYE_CLOSED : PASSWORD_EYE_OPEN;
+
+            button.setAttribute("aria-label", label);
+            button.setAttribute("aria-pressed", visible ? "true" : "false");
+            button.title = label;
+        }
+
+        apply(false);
+
+        button.addEventListener(
+            "click",
+            function() {
+                apply(input.type === "password");
+            }
+        );
+
+        wrapper.appendChild(button);
+
+    });
+
+}
+
+
+whenDomReady(function() {
+    attachPasswordToggles(document);
+});
+
