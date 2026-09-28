@@ -8,9 +8,12 @@ from app.core.database import get_db
 from app.core.security import create_access_token, get_current_user, hash_password, require_roles, verify_password
 from app.models.user import User
 from app.schemas.auth import (
+    AdminPasswordResetRequest,
     AdminUserCreate,
     BootstrapAdminRequest,
+    ChangePasswordRequest,
     LoginRequest,
+    PasswordChangeResponse,
     TokenResponse,
     UserRegistrationRequest,
     UserResponse,
@@ -79,3 +82,58 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.post("/change-password", response_model=PasswordChangeResponse)
+def change_password(
+    request: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Self-service password change for a signed-in user.
+
+    The current password is mandatory. Without it, anyone holding a leaked or
+    stolen access token could silently lock the real owner out. Hashing is
+    unchanged: both the check and the write go through the scrypt helpers in
+    app.core.security.
+    """
+    if not verify_password(request.current_password, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if verify_password(request.new_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=400,
+            detail="New password must be different from the current password",
+        )
+
+    current_user.password_hash = hash_password(request.new_password)
+    db.commit()
+    return PasswordChangeResponse(detail="Password updated successfully")
+
+
+@router.post("/admin/users/{user_id}/reset-password", response_model=PasswordChangeResponse)
+def admin_reset_password(
+    user_id: int,
+    request: AdminPasswordResetRequest,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("administrator")),
+):
+    """Administrator-assisted recovery for an account that cannot sign in.
+
+    There is no email delivery in this deployment, so a self-service reset link
+    cannot be sent. This is the deliberate substitute: it is gated by the same
+    require_roles helper every other privileged route uses, so RBAC behaviour is
+    not weakened or duplicated. It only ever re-hashes a new password; it never
+    reads, returns or logs the stored hash.
+    """
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not target.is_active:
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot reset the password of an inactive account",
+        )
+
+    target.password_hash = hash_password(request.new_password)
+    db.commit()
+    return PasswordChangeResponse(detail="Password reset successfully")
