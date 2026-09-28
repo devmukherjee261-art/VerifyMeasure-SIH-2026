@@ -15,7 +15,7 @@
 (function (global) {
     "use strict";
 
-    var API_BASE_URL_DEFAULT = "https://api.verifymeasure.example";
+    var API_BASE_URL_DEFAULT = "https://verifymeasure-api.onrender.com";
 
     function readMeta(name) {
         var tag = document.querySelector('meta[name="' + name + '"]');
