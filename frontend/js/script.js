@@ -70,6 +70,181 @@ if (loginForm) {
 
 }
 
+// Password change for a signed-in user
+//
+// The backend requires the current password, so a stolen access token on its
+// own is not enough to change it. Nothing here stores or logs a password.
+
+const changePasswordForm =
+    document.getElementById("changePasswordForm");
+
+
+if (changePasswordForm) {
+
+    changePasswordForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const message =
+                document.getElementById("changePasswordMessage");
+
+            const currentPassword =
+                document.getElementById("currentPassword").value;
+
+            const newPassword =
+                document.getElementById("newPassword").value;
+
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+            message.textContent = "";
+
+            if (newPassword !== confirmPassword) {
+                message.textContent =
+                    "The new passwords do not match.";
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    API_BASE_URL + "/auth/change-password",
+                    {
+                        method: "POST",
+                        headers: authenticatedJsonHeaders(),
+                        body: JSON.stringify({
+                            current_password: currentPassword,
+                            new_password: newPassword
+                        })
+                    }
+                );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail || "Could not update the password"
+                    );
+                }
+
+                changePasswordForm.reset();
+
+                message.style.color = "#166534";
+                message.textContent = data.detail;
+            } catch (error) {
+                console.error(
+                    "Change password error:",
+                    error
+                );
+
+                message.style.color = "#b91c1c";
+                message.textContent =
+                    error.message || "Could not connect to the backend.";
+            }
+
+        }
+    );
+
+}
+
+// Applicant account creation
+//
+// Calls the existing POST /auth/register endpoint, which always assigns the
+// applicant role. No token is issued and nothing is stored in localStorage here,
+// so the user signs in afterwards through the normal login form.
+
+const signupForm =
+    document.getElementById("signupForm");
+
+
+if (signupForm) {
+
+    signupForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const message =
+                document.getElementById("signupMessage");
+
+            const fullName =
+                document.getElementById("fullName").value.trim();
+
+            const email =
+                document.getElementById("signupEmail").value.trim();
+
+            const password =
+                document.getElementById("signupPassword").value;
+
+            const confirmPassword =
+                document.getElementById("confirmSignupPassword").value;
+
+            message.textContent = "";
+
+            if (password !== confirmPassword) {
+                message.textContent =
+                    "The passwords do not match.";
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    API_BASE_URL + "/auth/register",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password,
+                            full_name: fullName || null
+                        })
+                    }
+                );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail || "Could not create the account"
+                    );
+                }
+
+                message.style.color = "#166534";
+                message.textContent =
+                    "Account created. Redirecting to login...";
+
+                setTimeout(
+                    function() {
+                        window.location.href = "login.html";
+                    },
+                    1200
+                );
+            } catch (error) {
+                console.error(
+                    "Sign up error:",
+                    error
+                );
+
+                message.style.color = "#b91c1c";
+                message.textContent =
+                    error.message || "Could not connect to the backend.";
+            }
+
+        }
+    );
+
+}
+
 // Instrument registration
 
 const instrumentForm =

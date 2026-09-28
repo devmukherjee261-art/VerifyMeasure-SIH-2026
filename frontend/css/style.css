@@ -366,6 +366,46 @@ footer {
     background-color: #082f70;
 }
 
+
+/* Outlined counterpart to .form-btn, for a secondary action inside a form
+   card. .btn cannot be reused here: it is styled for the blue hero band and
+   renders white-on-white inside a card. */
+
+.form-alt-btn {
+
+    display: block;
+
+    width: 100%;
+
+    margin-top: 12px;
+
+    padding: 13px;
+
+    background-color: transparent;
+
+    color: #0b3d91;
+
+    border: 2px solid #0b3d91;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    text-align: center;
+
+    text-decoration: none;
+}
+
+.form-alt-btn:hover {
+
+    background-color: #eef2fa;
+}
+
+
 /* Dashboard */
 
 .dashboard {

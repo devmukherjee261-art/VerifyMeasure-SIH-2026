@@ -16,6 +16,7 @@
           href="css/style.css">
 
     <script src="js/config.js"></script>
+    <script src="js/script.js"></script>
 
 </head>
 
@@ -146,6 +147,75 @@
                 Search Instrument
 
             </a>
+
+        </div>
+
+
+        <div class="form-card wide">
+
+            <h2>
+                Change Password
+            </h2>
+
+            <p class="form-subtitle">
+                Enter your current password to set a new one.
+            </p>
+
+
+            <form id="changePasswordForm">
+
+                <label>
+                    Current Password
+                </label>
+
+                <input
+                    type="password"
+                    id="currentPassword"
+                    placeholder="Enter current password"
+                    autocomplete="current-password"
+                    required
+                >
+
+
+                <label>
+                    New Password
+                </label>
+
+                <input
+                    type="password"
+                    id="newPassword"
+                    placeholder="At least 8 characters"
+                    autocomplete="new-password"
+                    minlength="8"
+                    maxlength="128"
+                    required
+                >
+
+
+                <label>
+                    Confirm New Password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    placeholder="Repeat the new password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    maxlength="128"
+                    required
+                >
+
+
+                <button type="submit" class="form-btn">
+
+                    Update Password
+
+                </button>
+
+            </form>
+
+            <p id="changePasswordMessage" role="alert" style="color: #b91c1c;"></p>
 
         </div>
 
