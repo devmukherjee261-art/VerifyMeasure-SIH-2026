@@ -25,7 +25,6 @@ services:
       --workers 1
       --proxy-headers
       --forwarded-allow-ips '*'
-      --no-reload
     healthCheckPath: /health
     # Free instances spin down after 15 minutes without traffic. Expect the
     # first request after an idle period to take roughly 30-60 seconds while
