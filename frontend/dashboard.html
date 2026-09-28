@@ -16,7 +16,6 @@
           href="css/style.css">
 
     <script src="js/config.js"></script>
-    <script src="js/script.js"></script>
 
 </head>
 
@@ -306,6 +305,12 @@
 
 
     </script>
+
+    <!-- Loaded at the end of <body> so the change-password form exists by the
+         time script.js runs. config.js stays in <head> because the inline
+         script above reads window.APP_CONFIG. -->
+
+    <script src="js/script.js"></script>
 
 </body>
 

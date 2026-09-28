@@ -15,8 +15,9 @@
     <link rel="stylesheet"
           href="css/style.css">
 
-    <script src="js/config.js"></script>
-    <script src="js/script.js"></script>
+    <!-- config.js and script.js are deliberately at the end of <body>: the
+         form handler looks elements up as it runs, and loading it from <head>
+         would execute before the form exists. -->
 
 </head>
 
@@ -134,6 +135,9 @@
 
     </div>
 
+
+    <script src="js/config.js"></script>
+    <script src="js/script.js"></script>
 
 </body>
 
